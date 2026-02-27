@@ -1,0 +1,29 @@
+const express = require('express')
+
+const { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword } = require('../controllers/authController')
+
+const { isAuthenticated } = require('../middlewares/authMiddleware')
+
+const authRoute = express.Router()
+
+authRoute.route('/signup').post(signUp)
+
+authRoute.route('/login').post(login)
+
+authRoute.route('/profile').get(isAuthenticated,getProfile)
+
+// not validate
+
+authRoute.route('/user/:userId').get(isAuthenticated,getUserById)
+
+authRoute.route('/update-email').put(isAuthenticated,updateEmail)
+
+authRoute.route('/update-phone').put(isAuthenticated,updateMobileNumber)
+
+authRoute.route('/chnage-password').put(isAuthenticated,changePassword)
+
+authRoute.route('/forget-password').get(forgetPassword)
+
+authRoute.route('/reset-password').put(resetPassword)
+
+module.exports = {authRoute}
