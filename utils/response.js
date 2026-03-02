@@ -1,25 +1,32 @@
-const successResposne = (res,message,data = null)=>{
+const successResposne = (res, message, data = null) => {
     return res.json({
-        success : true,
+        success: true,
         message,
         data
     })
 }
 
-const failiureResposne = (res,message)=>{
+const failiureResposne = (res, message) => {
     return res.json({
-        success : false,
+        success: false,
         message,
     })
 }
 
-const errorResponse = (res,message,error = null) =>{
+const errorResponse = (res, message, error = null) => {
+    if (error.startsWith("Cannot destructure property")) {
+        return res.json({
+            success: false,
+            message,
+            error:"major fields are required"
+        })
+    }
     return res.json({
-        success : false,
+        success: false,
         message,
         error
     })
 }
 
 
-module.exports = {successResposne , failiureResposne , errorResponse}
+module.exports = { successResposne, failiureResposne, errorResponse }

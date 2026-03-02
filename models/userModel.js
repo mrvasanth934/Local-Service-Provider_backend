@@ -1,45 +1,45 @@
 const mongoose = require('mongoose')
 
 const addressScema = mongoose.Schema({
-        label: {
-            type: String, // Home, Work, etc.
+    label: {
+        type: String, // Home, Work, etc.
+        required: true,
+        trim: true,
+    },
+    fullAddress: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    city: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    state: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    pincode: {
+        type: String,
+        required: true,
+    },
+    location: {
+        lat: {
+            type: Number,
             required: true,
-            trim: true,
         },
-        fullAddress: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        city: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        state: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        pincode: {
-            type: String,
+        lng: {
+            type: Number,
             required: true,
         },
-        location: {
-            lat: {
-                type: Number,
-                required: true,
-            },
-            lng: {
-                type: Number,
-                required: true,
-            },
-        },
-        isDefault: {
-            type: Boolean,
-            default: false,
-        },
-    })
+    },
+    isDefault: {
+        type: Boolean,
+        default: false,
+    },
+})
 const userScema = mongoose.Schema({
     userName: {
         type: String
@@ -78,11 +78,17 @@ const userScema = mongoose.Schema({
     isProvider: {
         type: Boolean,
         default: false
-    }
+    },
+    services: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "service"
+        }
+    ]
 }, {
     timestamps: true
 })
 
-const userModel = mongoose.model("user",userScema)
+const userModel = mongoose.model("user", userScema)
 
 module.exports = userModel

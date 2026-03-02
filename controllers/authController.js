@@ -13,40 +13,49 @@ const signUp = async (req, res) => {
         if (!userName) {
             return failiureResposne(res, "userName is required")
         }
-        if (!email) {
+        else if (!email) {
             return failiureResposne(res, "email is required")
         }
-        if (!mobileNumber) {
+        else if (!mobileNumber) {
             return failiureResposne(res, "mobileNumber is required")
         }
-        if (!password) {
+        else if (!password) {
             return failiureResposne(res, "password is required")
         }
-        validateEmail(res, email)
-        validateMobileNumber(res, mobileNumber)
-        validatePassword(res, password)
+        else if (validateEmail(res, email) == true) {
+            if (validateMobileNumber(res, mobileNumber) == true) {
+                return validatePassword(res, password)
+            }
+            else {
+                return validateMobileNumber(res, mobileNumber)
+            }
+        }
+        else {
+            return validateEmail(res, email)
+        }
     }
     try {
         const { userName, email, password, mobileNumber } = req.body
-        vaildate(userName, email, password, mobileNumber);
-        const isAlreadyExistByEmail = await userModel.findOne({ email })
-        if (isAlreadyExistByEmail) {
-            return failiureResposne(res, "user already exist by th email")
+        if (vaildate(userName, email, password, mobileNumber) == true) {
+            const isAlreadyExistByEmail = await userModel.findOne({ email })
+            if (isAlreadyExistByEmail) {
+                return failiureResposne(res, "user already exist by th email")
+            }
+            const isAlreadyExistByUserName = await userModel.findOne({ userName })
+            if (isAlreadyExistByUserName) {
+                return failiureResposne(res, "user already exist by th userName")
+            }
+            const isAlreadyExistByPhoneNumber = await userModel.findOne({ mobileNumber })
+            if (isAlreadyExistByPhoneNumber) {
+                return failiureResposne(res, "user already exist by the PhoneNumber")
+            }
+            const encryptedPassword = await bcrypt.hash(password, 10)
+            const user = await userModel.create({ userName, email, password: encryptedPassword, mobileNumber })
+            if (!user) {
+                return failiureResposne(res, "signup fail")
+            }
+            return successResposne(res, "signup successfull")
         }
-        const isAlreadyExistByUserName = await userModel.findOne({ userName })
-        if (isAlreadyExistByUserName) {
-            return failiureResposne(res, "user already exist by th userName")
-        }
-        const isAlreadyExistByPhoneNumber = await userModel.findOne({ mobileNumber })
-        if (isAlreadyExistByPhoneNumber) {
-            return failiureResposne(res, "user already exist by the PhoneNumber")
-        }
-        const encryptedPassword = await bcrypt.hash(password, 10)
-        const user = await userModel.create({ userName, email, password: encryptedPassword, mobileNumber })
-        if (!user) {
-            return failiureResposne(res, "signup fail")
-        }
-        return successResposne(res, "signup successfull")
     } catch (error) {
         if (error.message == "Cannot destructure property 'fullName' of 'req.body' as it is undefined.") {
             return failiureResposne(res, "major fields are required")
@@ -76,36 +85,45 @@ const login = async (req, res) => {
             return failiureResposne(res, "password is required")
         }
         if (userCredintials.includes("@")) {
-            validateEmail(res, userCredintials)
-            const isExistByEmail = await userModel.findOne({ email: userCredintials })
-            if (isExistByEmail) {
-                if (!await comparePassword(password, isExistByEmail)) {
-                    return failiureResposne(res, "in correct password")
-                }
-                return handleLogin(isExistByEmail)
-            }
-
-        }
-        else {
-            const existByUserName = await userModel.findOne({ userName: userCredintials })
-            if (existByUserName) {
-                if (!await comparePassword(password, existByUserName)) {
-                    return failiureResposne(res, "in correct password")
-                }
-                return handleLogin(existByUserName)
-            }
-            else {
-                validateMobileNumber(res, userCredintials)
-                const existByPhoneNumber = await userModel.findOne({ mobileNumber: userCredintials })
-                if (existByPhoneNumber) {
-                    if (!await comparePassword(password, existByPhoneNumber)) {
+            if (validateEmail(res, userCredintials) == true) {
+                const isExistByEmail = await userModel.findOne({ email: userCredintials })
+                if (isExistByEmail) {
+                    if (!await comparePassword(password, isExistByEmail)) {
                         return failiureResposne(res, "in correct password")
                     }
-                    else {
-                        return handleLogin(existByPhoneNumber)
-                    }
+                    return handleLogin(isExistByEmail)
                 }
-                return failiureResposne(res, "user can`t find")
+                else {
+                    return failiureResposne(res, "can`t find user by the email")
+                }
+            }
+        }
+        else {
+            if (isNaN(Number(userCredintials))) {
+                const existByUserName = await userModel.findOne({ userName: userCredintials })
+                if (existByUserName) {
+                    if (!await comparePassword(password, existByUserName)) {
+                        return failiureResposne(res, "in correct password")
+                    }
+                    return handleLogin(existByUserName)
+                }
+                else {
+                    return failiureResposne(res, "can`t find user by the userName")
+                }
+            }
+            else {
+                if (validateMobileNumber(res, userCredintials) == true) {
+                    const existByPhoneNumber = await userModel.findOne({ mobileNumber: userCredintials })
+                    if (existByPhoneNumber) {
+                        if (!await comparePassword(password, existByPhoneNumber)) {
+                            return failiureResposne(res, "in correct password")
+                        }
+                        else {
+                            return handleLogin(existByPhoneNumber)
+                        }
+                    }
+                    return failiureResposne(res, "can`t find user by the mobileNumber")
+                }
             }
         }
 
@@ -148,7 +166,7 @@ const updateEmail = async (req, res) => {
             const token = jwt.sign({ email: user.email }, process.env.PASSKEY, { expiresIn: "1hr" })
             if (token) {
                 res.cookie("token", token, { maxAge: 60 * 60 * 1000, expiresIn: 60 * 60 * 1000 })
-                return successResposne(res, "email updated", user)
+                return successResposne(res, "your email id updated", user)
             }
             return failiureResposne(res, "can`t genrate token")
         }
@@ -184,17 +202,18 @@ const updateMobileNumber = async (req, res) => {
         if (!mobileNumber) {
             return failiureResposne(res, "mobile number is required")
         }
-        validateMobileNumber(res, mobileNumber)
-        const isAlreadyExist = await userModel.findOne({ mobileNumber })
-        if (isAlreadyExist) {
-            return failiureResposne(res, "user already exist by the mobile number")
+        if (validateMobileNumber(res, mobileNumber) == true) {
+            const isAlreadyExist = await userModel.findOne({ mobileNumber })
+            if (isAlreadyExist) {
+                return failiureResposne(res, "user already exist by the mobile number")
+            }
+            const user = req.user
+            const updateUser = await userModel.updateOne({ email: user.email }, { mobileNumber })
+            if (!updateUser) {
+                return failiureResposne(res, "can`t update")
+            }
+            return successResposne(res, "your mobile number is updated")
         }
-        const user = req.user
-        const updateUser = await userModel.updateOne({ email: user.email }, { mobileNumber })
-        if (!updateUser) {
-            return failiureResposne(res, "can`t update")
-        }
-        return successResposne(res, "updated successfull")
     } catch (error) {
         return errorResponse(res, "error from update email", error.message)
     }
@@ -213,19 +232,25 @@ const changePassword = async (req, res) => {
             return failiureResposne(res, "confirm password is required")
         }
         const user = req.user
-        if (user.password != currentPassword) {
-            return failiureResposne(res, "in correct password")
+        const deCryptPassword = await bcrypt.compare(currentPassword, user.password)
+        if (!deCryptPassword) {
+            return failiureResposne(res, "incorrect password")
         }
-        validatePassword(res, newPassword)
-        if (newPassword != confirmPassword) {
-            return failiureResposne(res, "password does not matched")
+        const isSamePassword = await bcrypt.compare(newPassword, user.password)
+        if (isSamePassword) {
+            return failiureResposne(res, "same password try different")
         }
-        const encryptedPassword = await bcrypt.hash(confirmPassword, 10)
-        const updateUser = await userModel.updateOne({ email: user.email }, { password: encryptedPassword })
-        if (!updateUser) {
-            return failiureResposne(res, "can`t update password")
+        if (validatePassword(res, newPassword) == true) {
+            if (newPassword != confirmPassword) {
+                return failiureResposne(res, "password doesn`t matched")
+            }
+            const encryptedPassword = await bcrypt.hash(confirmPassword, 10)
+            const updateUser = await userModel.updateOne({ email: user.email }, { password: encryptedPassword })
+            if (!updateUser) {
+                return failiureResposne(res, "can`t update password")
+            }
+            return successResposne(res, "password updated")
         }
-        return successResposne(res, "password updated")
     } catch (error) {
         return errorResponse(res, "error from change password", error.message)
     }
@@ -237,52 +262,79 @@ const forgetPassword = async (req, res) => {
         if (!email) {
             return failiureResposne(res, "email is required")
         }
-        validateEmail(res, email)
-        const isExist = await userModel.findOne({ email })
-        if (!isExist) {
-            return failiureResposne(res, "can`t find user by the email")
+        if (validateEmail(res, email) == true) {
+            const isExist = await userModel.findOne({ email })
+            if (!isExist) {
+                return failiureResposne(res, "can`t find user by the email")
+            }
+            const forgetPasswordToken = await jwt.sign({ email }, process.env.PASSKEY, { expiresIn: "10m" })
+            if (!forgetPasswordToken) {
+                return failiureResposne(res, "can`t gentrate token")
+            }
+            const changePasswordlink = `http://localhost:3000/api/v1/auth/reset-password/${forgetPasswordToken}`
+            return successResposne(res, `your reset password link is sent to this email id : ${email}`, changePasswordlink)
         }
-        const forgetPasswordToken = await jwt.sign({ email }, process.env.PASSKEY, { expiresIn: "10m" })
-        if (!forgetPasswordToken) {
-            return failiureResposne(res, "can`gentrate token")
-        }
-        const changePasswordlink = `http://localhost:3000/api/v1/auth/reset-password/${forgetPasswordToken}`
-        return successResposne(res, `reset password link ${changePasswordlink}`)
     } catch (error) {
+        if (error.message == "jwt expired") {
+            return failiureResposne(res, "your link is expired")
+        }
+        if (error.message == "invalid signature") {
+            return failiureResposne(res, "invalid link try again")
+        }
         return errorResponse(res, "error from forget password", error.message)
     }
 }
 
 const resetPassword = async (req, res) => {
-    const handleLogin = async (user) => {
-        const token = jwt.sign({ email: user.email }, process.env.PASSKEY, { expiresIn: "1hr" })
-        if (token) {
-            res.cookie("token", token, { maxAge: 60 * 60 * 1000, expiresIn: 60 * 60 * 1000 })
-            return successResposne(res, "password chnaged", user)
+    try {
+        const { resetPasswordToken } = req.params
+        const { newPassword, confirmPassword } = req.body;
+        const decryptToken = await jwt.verify(resetPasswordToken, process.env.PASSKEY)
+        if (!decryptToken) {
+            return failiureResposne(res, "can`t decrypt token")
         }
-        return failiureResposne(res, "can`t genrate token")
+        if (!newPassword) {
+            return failiureResposne(res, "newPassword is required")
+        }
+        if (!confirmPassword) {
+            return failiureResposne(res, "confirmPassword is required")
+        }
+        if (validatePassword(res, newPassword) == true) {
+            if (newPassword != confirmPassword) {
+                return failiureResposne(res, "password not matched")
+            }
+            const encryptedPassword = await bcrypt.hash(newPassword, 10);
+            const updateUser = await userModel.updateOne({ email: decryptToken.email }, { password: encryptedPassword })
+            if (!updateUser) {
+                return failiureResposne(res, "can`t update password")
+            }
+            return successResposne(res, "your password is reseted")
+        }
+    } catch (error) {
+        if (error.message == "jwt expired") {
+            return failiureResposne(res, "your link is expired try again")
+        }
+        if (error.message == "invalid signature") {
+            return failiureResposne(res, "invalid link try again")
+        }
+        return errorResponse(res, "error from reset password", error.message)
     }
-    const { newPassword, confirmPassword } = req.body;
-    const user = req.user
-    if (!newPassword) {
-        return failiureResposne(res, "newPassword is required")
+}
+
+const deleteUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (userId.length != 24) {
+            return failiureResposne(res, "inValid userId")
+        }
+        const deleteUser = await userModel.deleteOne({ _id: userId })
+        if (!deleteUser) {
+            return failiureResposne(res, "can`t delete the user")
+        }
+        return successResposne(res, "user deleted")
+    } catch (error) {
+        return errorResponse(res, "error from delete user", error.message)
     }
-    if (!confirmPassword) {
-        return failiureResposne(res, "confirmPassword is required")
-    }
-    validatePassword(res, newPassword)
-    if (user.password == newPassword) {
-        return failiureResposne(res, "same password")
-    }
-    if (newPassword != confirmPassword) {
-        return failiureResposne(res, "password not matched")
-    }
-    const encryptedPassword = await bcrypt.hash(newPassword, 10);
-    const updateUser = await userModel.updateOne({ email: user.email }, { password: encryptedPassword })
-    if (!updateUser) {
-        return failiureResposne(res, "can`t update password")
-    }
-    return handleLogin(user)
 }
 
 module.exports = { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword }

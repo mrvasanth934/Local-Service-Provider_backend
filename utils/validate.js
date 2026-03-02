@@ -1,6 +1,4 @@
 const { failiureResposne } = require("./response")
-
-const emailvalidate = /^[a-z]+/
 const mobileValidate = /^[6-9]/
 const validateEmail = (res, email) => {
     if (!/^[a-z]+[0-9]*[a-z]*@[a-z]/.test(email) || !email.endsWith(".com")) {
@@ -23,19 +21,22 @@ const validateMobileNumber = (res, mobileNumber) => {
 
 const validatePassword = (res, password) => {
     if (password.length < 8) {
-        return failiureResposne(res, "Mobile number must 10 character")
+        return failiureResposne(res, "password number must greater then 8 character")
     }
-    if (!/[a-z]+/.test(password)) {
+    else if (!/[a-z]+/.test(password)) {
         return failiureResposne(res, "Enter atleast one small letter")
     }
-    if (!/[A-Z]+/.test(password)) {
+    else if (!/[A-Z]+/.test(password)) {
         return failiureResposne(res, "Enter atleast one capital letter")
     }
-    if (!/\d+/.test(password)) {
+    else if (!/\d+/.test(password)) {
         return failiureResposne(res, "Enter atleast one number")
     }
-    if (!/[!@#$%^&*]+/.test(password)) {
+    else if (!/[!@#$%^&*]+/.test(password)) {
         return failiureResposne(res, "Enter atleast one special character")
+    }
+    else{
+        return true
     }
 }
 

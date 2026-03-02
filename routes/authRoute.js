@@ -12,18 +12,16 @@ authRoute.route('/login').post(login)
 
 authRoute.route('/profile').get(isAuthenticated,getProfile)
 
-// not validate
-
 authRoute.route('/user/:userId').get(isAuthenticated,getUserById)
 
 authRoute.route('/update-email').put(isAuthenticated,updateEmail)
 
-authRoute.route('/update-phone').put(isAuthenticated,updateMobileNumber)
+authRoute.route('/update-mobile-number').put(isAuthenticated,updateMobileNumber)
 
-authRoute.route('/chnage-password').put(isAuthenticated,changePassword)
+authRoute.route('/change-password').put(isAuthenticated,changePassword)
 
 authRoute.route('/forget-password').get(forgetPassword)
 
-authRoute.route('/reset-password').put(resetPassword)
+authRoute.route('/reset-password/:resetPasswordToken').put(resetPassword)
 
 module.exports = {authRoute}

@@ -1,0 +1,17 @@
+signup - method:post - link:http://localhost:3000/api/v1/auth/signup
+
+login - method:post - link:http://localhost:3000/api/v1/auth/login
+
+profile - method:get - link:http://localhost:3000/api/v1/auth/profile
+
+getuser - method:get - link:http://localhost:3000/api/v1/auth/user/{}
+
+update-email - method:put - link:http://localhost:3000/api/v1/auth/update-email
+
+update-mobile-number - method:put - link:http://localhost:3000/api/v1/auth/update-mobile-number
+
+change-password - method:put - link:http://localhost:3000/api/v1/auth/change-password
+
+forget-password - method:get - link:http://localhost:3000/api/v1/auth/forget-password
+
+reset-password - method:put - link:http://localhost:3000/api/v1/auth/reset-password/{}
