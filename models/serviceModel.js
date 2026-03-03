@@ -20,11 +20,7 @@ const serviceSchema = new mongoose.Schema({
   },
   providerExperince:{
     type:Number,
-    default:2
-  },
-  distanceChargeperKm:{
-    type:Number,
-    default:3
+    default:1
   },
   ServiceImage: {
     type: String

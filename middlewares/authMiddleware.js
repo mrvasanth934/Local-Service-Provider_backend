@@ -20,7 +20,7 @@ const isAuthenticated = async (req, res, next) => {
             return failiureResposne(res, "can`t find user")
         }
         req.user = user
-        next()
+        return next()
     } catch (error) {
         if (error.message == "jwt expired") {
             return failiureResposne(res, "continue with login")
@@ -31,5 +31,20 @@ const isAuthenticated = async (req, res, next) => {
         errorResponse(res, "error from get profile", error.message)
     }
 }
+const isAdmin = async(req,res,next) =>{
+    const admin = req.user;
+    if(admin.role == "admin"){
+        return next()
+    }
+    return failiureResposne(res,"this service only access by the admin")
+}
 
-module.exports = { isAuthenticated }
+const isProvider = async(req,res,next) =>{
+    const admin = req.user;
+    if(admin.role == "provider"){
+        return next()
+    }
+    return failiureResposne(res,"this service only access by the provider")
+}
+
+module.exports = { isAuthenticated,isAdmin,isProvider }

@@ -1,8 +1,8 @@
 const express = require('express')
 
-const { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword } = require('../controllers/authController')
+const { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword, getAllUsers } = require('../controllers/authController')
 
-const { isAuthenticated } = require('../middlewares/authMiddleware')
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware')
 
 const authRoute = express.Router()
 
@@ -11,6 +11,8 @@ authRoute.route('/signup').post(signUp)
 authRoute.route('/login').post(login)
 
 authRoute.route('/profile').get(isAuthenticated,getProfile)
+
+authRoute.route('/all-users').get(isAuthenticated,isAdmin,getAllUsers)
 
 authRoute.route('/user/:userId').get(isAuthenticated,getUserById)
 

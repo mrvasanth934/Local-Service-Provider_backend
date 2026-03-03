@@ -22,7 +22,7 @@ const createService = async (req, res) => {
             return failiureResposne(res, "providerExperince is required")
         }
         if (Number(providerExperince) <= 1) {
-            return failiureResposne(res, "providerExperience must greater than 1 year")
+            return failiureResposne(res, "providerExperience must greater than or equal 1 year")
         }
         const createService = await serviceModel.create({ serviceName, serviceCategory, serviceDescription, servicePrice, providerExperince, provider: provider._id })
         if (!createService) {
@@ -65,26 +65,35 @@ const getServiceBydId = async (req, res) => {
     }
 }
 
-// const updateService = async(req,res) =>{
-//     const user = req.user
-//     try {
-//         const { serviceName, serviceCategory, serviceDescription, servicePrice, providerExperince } = req.body;
-//         const { serviceId } = req.body;
-//         if (serviceId.length != 24) {
-//             return failiureResposne(res, "inValid serviceId")
-//         }
-//         const isExist = await serviceModel.findOne({_id:serviceId})
-//         if(!isExist){
-//             return failiureResposne(res,"can`t get service")
-//         }
-//         if(user._id.toString() == isExist.user.toString()){
-//             const updateService = await serviceModel.updateOne({_id:serviceId},{serviceName, serviceCategory, serviceDescription, servicePrice, providerExperince})
-//         }
-//         return failiureResposne(res,"can`t update the service by you")
-//     } catch (error) {
+const updateServicePrice = async(req,res) =>{
+    const provider = req.user
+    try {
+        const {providerExperince} = req.body;
+        const { serviceId } = req.body;
+        if (serviceId.length != 24) {
+            return failiureResposne(res, "inValid serviceId")
+        }
+        const isExist = await serviceModel.findOne({_id:serviceId,provider:provider._id})
+        let servicePrice;
+        if(Number(providerExperince) == 0.5 ){
+            servicePrice =  servicePrice + servicePrice % 15
+        }
+        if(Number(providerExperince) == 1 ){
+            servicePrice =  servicePrice + servicePrice % 30
+        }
+        if(!isExist){
+            return failiureResposne(res,"can`t get service")
+        }
+        const updateService = await serviceModel.updateOne({_id:serviceId},{providerExperince, servicePrice})
+        if(!updateService){
+            return failiureResposne(res,"can`t update service")
+        }
+        return successResposne(res,"your service is updated")
 
-//     }
-// }
+    } catch (error) {
+
+    }
+}
 
 const updateServiceRequest = async () => {
     try {
@@ -139,3 +148,39 @@ const deleteService = async () => {
         return errorResponse(res, "error from delete service", error.message)
     }
 }
+
+const getServicesByCategory = async () => {
+    try {
+        const { category } = req.body
+        if (!category) {
+            return failiureResposne(res, "category is required")
+        }
+        const services = await serviceModel.find({ category: { $regex: searchTerm, $options: 'i' } })
+        if (services) {
+            if (services.length == 0) {
+                return successResposne(res, "no more results by the category")
+            }
+            return successResposne(res, "services", services)
+        }
+        return failiureResposne(res, "can`t get services")
+    } catch (error) {
+        return errorResponse(res, "error from getServices by category service", error.message)
+    }
+}
+
+const getProviderServices = async () =>{
+    const {providerId} = req.params
+    if(providerId.length != 24){
+        return failiureResposne(res,"inValid providerId")
+    }
+    const services = await serviceModel.find({provider:providerId})
+    if(services){
+        if(services.length == 0){
+            return successResposne(res,"no more services by the provider")
+        }
+        return successResposne(res,"services",services)
+    }
+    return failiureResposne(res,"can`t get services")
+}
+
+module.exports = {createService}

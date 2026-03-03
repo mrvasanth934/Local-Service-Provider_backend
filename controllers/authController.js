@@ -321,6 +321,24 @@ const resetPassword = async (req, res) => {
     }
 }
 
+const getAllUsers = async (req, res) => {
+    try {
+
+        const users = await userModel.find()
+        if (!users) {
+            return failiureResposne(res, "can`t get users")
+        }
+        else{
+            if(users.length == 0){
+                return successResposne(res,"no more users")
+            }
+            return successResposne(res, "all users",users)
+        }
+    } catch (error) {
+        return errorResponse(res, "error from delete user", error.message)
+    }
+}
+
 const deleteUser = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -337,4 +355,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword }
+module.exports = { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword,getAllUsers }

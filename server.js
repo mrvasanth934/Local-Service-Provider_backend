@@ -6,6 +6,10 @@ const cookieParser = require('cookie-parser')
 
 const { authRoute } = require('./routes/authRoute')
 
+const {providerRoute} = require('./routes/providerRoute')
+
+const serviceRoute = require('./routes/serviceRoute')
+
 require('dotenv').config()
 
 const app = express()
@@ -20,3 +24,7 @@ app.listen(process.env.PORT,()=>{console.log(`server listen using port number of
 })
 
 app.use('/api/v1/auth',authRoute)
+
+app.use('/api/v1/provider',providerRoute)
+
+app.use('/api/v1/service',serviceRoute)
