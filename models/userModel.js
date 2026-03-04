@@ -82,13 +82,13 @@ const userScema = mongoose.Schema({
     services: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "service"
+            ref: "Service"
         }
     ]
 }, {
     timestamps: true
 })
 
-const userModel = mongoose.model("user", userScema)
+const userModel = mongoose.model("User", userScema)
 
 module.exports = userModel

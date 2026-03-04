@@ -1,13 +1,12 @@
 const mongoose = require("mongoose");
 
 const serviceSchema = new mongoose.Schema({
-  servicName: {
+  serviceName: {
     type: String,
     trim: true
   },
   serviceCategory: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
+    type:String
   },
   serviceDescription: {
     type: String,
@@ -16,7 +15,8 @@ const serviceSchema = new mongoose.Schema({
     type: Number
   },
   provider:{
-    type:mongoose.Schema.Types.ObjectId
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"user"
   },
   providerExperince:{
     type:Number,

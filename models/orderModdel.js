@@ -54,7 +54,6 @@ const orderSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-
     orderStatus: {
         type: String,
         enum: [
@@ -68,10 +67,18 @@ const orderSchema = new mongoose.Schema({
         default: "pending"
     },
     payment:{
-        paymentSchema
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Payment"
+    },
+    orderTotal:{
+        type:Number
     },
     acceptedAt: Date,
     cancelledAt: Date,
     completedAt: Date
 
 }, { timestamps: true });
+
+const orderModel = mongoose.model("Orders",orderSchema)
+
+module.exports = orderModel

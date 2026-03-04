@@ -10,6 +10,8 @@ const {providerRoute} = require('./routes/providerRoute')
 
 const serviceRoute = require('./routes/serviceRoute')
 
+const orderRoute = require('./routes/orderRoute')
+
 require('dotenv').config()
 
 const app = express()
@@ -28,3 +30,5 @@ app.use('/api/v1/auth',authRoute)
 app.use('/api/v1/provider',providerRoute)
 
 app.use('/api/v1/service',serviceRoute)
+
+app.use('/api/v1/orders',orderRoute)

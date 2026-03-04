@@ -29,7 +29,7 @@ const sentProviderRequst = async (req, res) => {
 
 const getAllProviders = async (req, res) => {
     try {
-        const providers = await userModel.find({ isProvider: true, role: "provider" })
+        const providers = await userModel.find({ isProvider: true, role: "provider" }).populate("services")
         if (providers) {
             if (providers.length == 0) {
                 return successResposne(res, "no more providers")
@@ -45,7 +45,7 @@ const getAllProviders = async (req, res) => {
 const getSingleProvider = async (req, res) => {
     try {
         const { providerId } = req.params
-        const provider = await userModel.findOne({ _id: providerId, isProvider: true, role: "provider" })
+        const provider = await userModel.findOne({ _id: providerId, isProvider: true, role: "provider" }).populate("services")
         if (provider) {
             return successResposne(res, "provider", provider)
         }
@@ -88,7 +88,7 @@ const updateProviderRequest = async (req, res) => {
         }
 
         else {
-            if (status) {
+            if (status == "true") {
                 const udpdateUser = await userModel.updateOne({ _id: userId }, { providerRequest: false, isProvider: true, role: "provider" })
                 if (!udpdateUser) {
                     return failiureResposne(res, "can`t update provider Request")
@@ -123,64 +123,6 @@ const getProviderRequestStatus = async (req, res) => {
         }
     } catch (error) {
         return errorResponse(res, "error from check provider request status", error.message)
-    }
-}
-
-const getProviderOrders = async (req, res) => {
-    try {
-        const user = req.user
-        const orders = await orderModel.find({ provider: user._id })
-        if (orders) {
-            if (orders.length == 0) {
-                return successResposne(res, "no more orders")
-            }
-            return successResposne(res, "your orders", orders)
-        }
-        return successResposne(res, "can`t get orders")
-    } catch (error) {
-        return errorResponse(res, "error from get provider orders", error.message)
-    }
-}
-
-const getSingleProviderOrder = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const provider = req.user
-        if (orderId.length != 24) {
-            return failiureResposne(res, "inValid orderId")
-        }
-        const order = await orderModel.findOne({ _id: orderId, provider: provider._id })
-        if (!order) {
-            return failiureResposne(res, "can`t get order")
-        }
-        return successResposne(res, "your order", order)
-    } catch (error) {
-        return errorResponse(res, "error from get provider orders", error.message)
-    }
-}
-
-const updateAvailablityStatus = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        if (orderId.length != 24) {
-            return failiureResposne(res, "inValid orderId")
-        }
-        const { orderStatus } = req.body;
-        if (!orderStatus) {
-            return failiureResposne(res, "orderStatus ir required")
-        }
-        const provider = req.user
-        const order = await orderModel.findOne({ _id: orderId, provider: provider._id })
-        if (!order) {
-            return failiureResposne(res, "can`t get order")
-        }
-        const updateOrder = await orderModel.updateOne({ _id: orderId }, { orderStatus })
-        if (updateOrder) {
-            return successResposne(res, `order status updated`)
-        }
-        return failiureResposne(res, "can`t update order")
-    } catch (error) {
-        return errorResponse(res, "error from update availablity status", error.message)
     }
 }
 

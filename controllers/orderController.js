@@ -1,8 +1,7 @@
-const { failiureResposne, successResposne, errorResponse } = require("../utils/response")
-
 const orderModel = require("../models/orderModdel")
-
 const { paymentModel } = require("../models/paymentModel")
+
+const { failiureResposne, successResposne, errorResponse } = require("../utils/response")
 
 const createOrder = async (req, res) => {
     try {
@@ -42,25 +41,30 @@ const createOrder = async (req, res) => {
         const user = req.user
         const { provider, service, label, fullAddress, city, state, pincode, servicePrice, paymentMethod, distance, } = req.body;
         if (inputValidate(provider, service, label, fullAddress, city, state, pincode, servicePrice, paymentMethod, distance) == true) {
-            const commisionFee = Number(servicePrice) % 10
+            const commisionFee = Number(servicePrice) / 10
             const distanceChargeperKm = Number(distance) * 3;
-            const providerEarning = Number(servicePrice) % 90 + distanceChargeperKm;
+            const providerEarning = (Number(servicePrice) - commisionFee) + distanceChargeperKm
             const total = servicePrice + distanceChargeperKm
-            const createService = await orderModel.create({ user: user._id, provider, service, address: { label, fullAddress, city, state, pincode }, paymenth: { servicePrice, commisionFee, providerEarning, distanceChargeperKm, total } })
+            const createpayment = await paymentModel.create({servicePrice,commisionFee,providerEarning,distanceChargeperKm,total,paymentMethod});
+            if(!createpayment){
+                return failiureResposne("order failed")
+            }
+            const createService = await orderModel.create({ user: user._id, provider, service, address: { label, fullAddress, city, state, pincode }, payment: createpayment._id,orderTotal:total })
             if (!createService) {
                 return failiureResposne(res, "order failed")
             }
+            await paymentModel.updateOne({_id : createpayment._id},{orderId:createService._id})
             return successResposne(res, "order successfull", createService)
         }
     } catch (error) {
-        return failiureResposne(res, "error from create order", error.message)
+        return errorResponse(res, "error from create order", error.message)
     }
 }
 
 const getUserOrders = async (req, res) => {
     try {
         const user = req.user;
-        const orders = await orderModel.find({ user: user._id })
+        const orders = await orderModel.find({ user: user._id }).populate("user").populate("provider").populate("service").populate("payment")
         if (orders) {
             if (orders.length == 0) {
                 return successResposne(res, "no more orders")
@@ -69,14 +73,31 @@ const getUserOrders = async (req, res) => {
         }
         return failiureResposne(res, "can`t get orders")
     } catch (error) {
-        return failiureResposne(res, "error from get user orders", error.message)
+        return errorResponse(res, "error from get user orders", error.message)
+    }
+}
+
+const getSingleOrderByUser = async (req,res) => {
+    try {
+        const { orderId } = req.params
+        if (orderId.length != 24) {
+            return failiureResposne(res, "inValid orderId")
+        }
+        const user = req.user;
+        const order = await orderModel.findOne({ _id: orderId, user: user._id }).populate("user").populate("provider").populate("service").populate("payment")
+        if (order) {
+            return successResposne(res, "order", order)
+        }
+        return failiureResposne(res, "can`t get order")
+    } catch (error) {
+        return failiureResposne(res, "error from getSingleOrderByUser", error.message)
     }
 }
 
 const getProviderOrders = async (req, res) => {
     try {
         const provider = req.user;
-        const orders = await orderModel.find({ provider: provider._id })
+        const orders = await orderModel.find({ provider: provider._id }).populate("user").populate("provider").populate("service").populate("payment")
         if (orders) {
             if (orders.length == 0) {
                 return successResposne(res, "no more orders")
@@ -89,31 +110,14 @@ const getProviderOrders = async (req, res) => {
     }
 }
 
-const getSingleOrderByUser = async () => {
-    try {
-        const { orderId } = req.params
-        if (orderId.length != 24) {
-            return failiureResposne(res, "inValid orderId")
-        }
-        const user = req.user;
-        const order = await orderModel.findOne({ _id: orderId, user: user._id })
-        if (order) {
-            return successResposne(res, "order", order)
-        }
-        return failiureResposne(res, "can`t get order")
-    } catch (error) {
-        return failiureResposne(res, "error from getSingleOrderByUser", error.message)
-    }
-}
-
-const getSingleOrderByProvider = async () => {
+const getSingleOrderByProvider = async (req,res) => {
     try {
         const { orderId } = req.params
         if (orderId.length != 24) {
             return failiureResposne(res, "inValid orderId")
         }
         const provider = req.user;
-        const order = await orderModel.findOne({ _id: orderId, provider: provider._id })
+        const order = await orderModel.findOne({ _id: orderId, provider: provider._id }).populate("user").populate("provider").populate("service").populate("payment")
         if (order) {
             return successResposne(res, "order", order)
         }
@@ -125,7 +129,7 @@ const getSingleOrderByProvider = async () => {
 
 const getAllOrders = async (req, res) => {
     try {
-        const orders = await orderModel.find()
+        const orders = await orderModel.find().populate("user").populate("provider").populate("service").populate("payment")
         if (orders) {
             if (orders.length == 0) {
                 return successResposne(res, "no more orders")
@@ -144,7 +148,7 @@ const getSingleOrder = async (req, res) => {
         if (orderId.length != 24) {
             return failiureResposne(res, "inValid orderId")
         }
-        const order = await orderModel.findOne({ _id: orderId })
+        const order = await orderModel.findOne({ _id: orderId }).populate("user").populate("provider").populate("service").populate("payment")
         if (order) {
             return successResposne(res, "order", order)
         }
@@ -205,9 +209,9 @@ const cancelOrderByUser = async (req, res) => {
                 return successResposne(res, "order already canceled")
             }
             else {
-                const rejectedOrder = await orderModel.updateOne({ _id: orderId }, { orderStatus: "cancelled" })
+                const rejectedOrder = await orderModel.updateOne({ _id: orderId}, { orderStatus: "cancelled" })
                 if (rejectedOrder) {
-                    return successResposne(res, "order rejected")
+                    return successResposne(res, "order cancelled")
                 }
                 return failiureResposne(res, "can`t reject the order")
             }
@@ -217,3 +221,5 @@ const cancelOrderByUser = async (req, res) => {
         return failiureResposne(res, "error from updateOrderStatusByUser", error.message)
     }
 }
+
+module.exports = {createOrder,getUserOrders,getProviderOrders,getSingleOrderByProvider,getSingleOrderByUser,getAllOrders,getSingleOrder,rejectOrderByProvider,cancelOrderByUser}
