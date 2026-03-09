@@ -12,7 +12,7 @@ const validateMobileNumber = (res, mobileNumber) => {
         return failiureResposne(res, "mobile number must 10 character")
     }
     else if (!mobileValidate.test(mobileNumber)) {
-        return failiureResposne(res, "enter a valid mobilenumber")
+        return failiureResposne(res, "enter a valid mobile number")
     }
     else{
         return true
@@ -21,19 +21,19 @@ const validateMobileNumber = (res, mobileNumber) => {
 
 const validatePassword = (res, password) => {
     if (password.length < 8) {
-        return failiureResposne(res, "password number must greater then 8 character")
+        return failiureResposne(res, "password must greater then 8 character")
     }
     else if (!/[a-z]+/.test(password)) {
-        return failiureResposne(res, "Enter atleast one small letter")
+        return failiureResposne(res, "Enter atleast one small letter in password")
     }
     else if (!/[A-Z]+/.test(password)) {
-        return failiureResposne(res, "Enter atleast one capital letter")
+        return failiureResposne(res, "Enter atleast one capital letter in password")
     }
     else if (!/\d+/.test(password)) {
-        return failiureResposne(res, "Enter atleast one number")
+        return failiureResposne(res, "Enter atleast one number in password")
     }
     else if (!/[!@#$%^&*]+/.test(password)) {
-        return failiureResposne(res, "Enter atleast one special character")
+        return failiureResposne(res, "Enter atleast one special character in password")
     }
     else{
         return true

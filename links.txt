@@ -1,4 +1,6 @@
-signup - method:post - link:http://localhost:3000/api/v1/auth/signup
+// auth based links
+
+signup - method:post - link:http://localhost:3000/api/v1/auth/signup 
 
 login - method:post - link:http://localhost:3000/api/v1/auth/login
 
@@ -6,12 +8,81 @@ profile - method:get - link:http://localhost:3000/api/v1/auth/profile
 
 getuser - method:get - link:http://localhost:3000/api/v1/auth/user/{}
 
+get-all-users method:get - link:http://localhost:3000/api/v1/auth/all-users
+
 update-email - method:put - link:http://localhost:3000/api/v1/auth/update-email
+
+update-user-name method:put - link:http://localhost:3000/api/v1/auth/update-username
 
 update-mobile-number - method:put - link:http://localhost:3000/api/v1/auth/update-mobile-number
 
 change-password - method:put - link:http://localhost:3000/api/v1/auth/change-password
 
-forget-password - method:get - link:http://localhost:3000/api/v1/auth/forget-password
+forget-password - method:put - link:http://localhost:3000/api/v1/auth/forget-password
 
 reset-password - method:put - link:http://localhost:3000/api/v1/auth/reset-password/{}
+
+
+
+// provider based links
+
+provider-request method:put - link:http://localhost:3000/api/v1/provider/provider-request
+
+all-providers - method:get - link:http://localhost:3000/api/v1/provider/all-providers
+
+get-single-provider - method:get - link:http://localhost:3000/api/v1/provider/provider/:providerId
+
+get-provider-requests - method:get - link:http://localhost:3000/api/v1/provider/provider-requests
+
+update-provider-requests - method:put - link:http://localhost:3000/api/v1/provider/update-provider-request/:userId/:status
+
+check-provider-request-status - method:get - link:http://localhost:3000/api/v1/provider/provider-request-status
+
+
+
+// services based links
+
+create-service - method:post - link:http://localhost:3000/api/v1/service/create-service
+
+get-service-requests - method:get - link:http://localhost:3000/api/v1/service/service-requests
+
+get-all-services - method:get - link:http://localhost:3000/api/v1/service/services
+
+get-single-service method:get - link:http://localhost:3000/api/v1/service/service/:serviceId
+
+update-service-request - method:put - link:http://localhost:3000/api/v1/service/update-service-request/:serviceId/:status
+
+update-service-price - method:put - link:http://localhost:3000/api/v1/service/update-service-price/:serviceId
+
+get-services-by-category - method:get - link:http://localhost:3000/api/v1/service/services/:category
+
+serch-services - method:get - link:http://localhost:3000/api/v1/service/services/serch/:serchKeywords
+
+get-provider-services - method:get - link:http://localhost:3000/api/v1/service/provider-services
+
+
+
+// order based links
+
+
+create-order - method:post - link:http://localhost:3000/api/v1/orders/create
+
+my-orders - method:get - link:http://localhost:3000/api/v1/orders/my-orders
+
+get-single-order - method:get - link:http://localhost:3000/api/v1/orders/user/:orderId
+
+get-provider-orders method:get - link:http://localhost:3000/api/v1/orders/orders/provider-orders
+
+get-provider-single-order - method:put - link:http://localhost:3000/api/v1/orders/provider/:orderId
+
+get-all-orders - method:put - link:http://localhost:3000/api/v1/orders/all-orders
+
+get-order-by-id - method:put - link:http://localhost:3000/api/v1/orders/order/:orderId
+
+reject-order-provider - method:put - link:http://localhost:3000/api/v1/orders/provider/reject-order/:orderId
+
+cancel-order - method:put - link:http://localhost:3000/api/v1/orders/user/cancel-order/:orderId
+
+
+
+

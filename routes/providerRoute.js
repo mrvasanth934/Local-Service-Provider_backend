@@ -11,7 +11,6 @@ providerRoute.route("/all-providers").get(isAuthenticated,isAdmin,getAllProvider
 
 providerRoute.route("/provider/:providerId").get(isAuthenticated,getSingleProvider)
 
-
 providerRoute.route("/provider-requests").get(isAuthenticated,isAdmin,getAllProviderRequests)
 
 providerRoute.route("/update-provider-request/:userId/:status").put(isAuthenticated,isAdmin,updateProviderRequest)

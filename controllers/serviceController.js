@@ -7,17 +7,11 @@ const createService = async (req, res) => {
     try {
         const provider = req.user
         const { serviceName, serviceCategory, serviceDescription, servicePrice, providerExperince } = req.body;
-        if (!serviceName) {
-            return failiureResposne(res, "serviceName is required")
-        }
         if (!serviceCategory) {
-            return failiureResposne(res, "serviceCategory is required")
+            return failiureResposne(res, "Choose a serviceCategory")
         }
-        if (!servicePrice) {
-            return failiureResposne(res, "servicePrice is required")
-        }
-        if (!serviceDescription) {
-            return failiureResposne(res, "serviceDescription is required")
+        if (!serviceName) {
+            return failiureResposne(res, "choose a serviceName")
         }
         if (!providerExperince) {
             return failiureResposne(res, "providerExperince is required")
@@ -25,6 +19,19 @@ const createService = async (req, res) => {
         if (Number(providerExperince) < 1) {
             return failiureResposne(res, "providerExperience must greater than or equal 1 year")
         }
+        if (!servicePrice) {
+            return failiureResposne(res, "servicePrice is required")
+        }
+        if (!serviceDescription) {
+            return failiureResposne(res, "serviceDescription is required")
+        }
+        if(serviceDescription.split(" ").length < 30){
+            return failiureResposne(res, `description min 30 words , this contain ${serviceDescription.split(" ").length} words`)
+        }
+        if(serviceDescription.split(" ").length > 40){
+            return failiureResposne(res, `description upto 40 words , this contain ${serviceDescription.split(" ").length} words`)
+        }
+        
         const createService = await serviceModel.create({ serviceName, serviceCategory, serviceDescription, servicePrice, providerExperince, provider: provider._id })
         if (!createService) {
             return failiureResposne(res, "can`t create service")
@@ -99,7 +106,7 @@ const getAllServices = async (req, res) => {
         }
         return failiureResposne(res, "can`t get all services")
     } catch (error) {
-        errorResponse(res, "error from getAllServices service", error.message)
+        errorResponse(res, "error from getAllServices", error.message)
     }
 }
 
@@ -214,8 +221,6 @@ const serchServices = async (req, res) => {
 
 const getProviderServices = async (req, res) => {
     const provider = req.user
-    console.log(provider._id);
-    
     const services = await serviceModel.find({ provider: provider._id })
     if (services) {
         if (services.length == 0) {

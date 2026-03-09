@@ -47,7 +47,7 @@ const signUp = async (req, res) => {
             }
             const isAlreadyExistByPhoneNumber = await userModel.findOne({ mobileNumber })
             if (isAlreadyExistByPhoneNumber) {
-                return failiureResposne(res, "user already exist by the PhoneNumber")
+                return failiureResposne(res, "user already exist by the mobile number")
             }
             const encryptedPassword = await bcrypt.hash(password, 10)
             const user = await userModel.create({ userName, email, password: encryptedPassword, mobileNumber })
@@ -219,6 +219,27 @@ const updateMobileNumber = async (req, res) => {
     }
 }
 
+const updateUsername = async (req, res) => {
+    try {
+        const { userName } = req.body
+        if (!userName) {
+            return failiureResposne(res, "user name is required")
+        }
+        const isAlreadyExist = await userModel.findOne({ userName })
+        if (isAlreadyExist) {
+            return failiureResposne(res, "user already exist by the user name")
+        }
+        const user = req.user
+        const updateUser = await userModel.updateOne({ email: user.email }, { userName })
+        if (!updateUser) {
+            return failiureResposne(res, "can`t update")
+        }
+        return successResposne(res, "your user name is updated")
+    } catch (error) {
+        return errorResponse(res, "error from update user name", error.message)
+    }
+}
+
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
@@ -272,7 +293,7 @@ const forgetPassword = async (req, res) => {
                 return failiureResposne(res, "can`t gentrate token")
             }
             const changePasswordlink = `http://localhost:3000/api/v1/auth/reset-password/${forgetPasswordToken}`
-            return successResposne(res, `your reset password link is sent to this email id : ${email}`, changePasswordlink)
+            return successResposne(res, `reset link sent to your e-mail id`, changePasswordlink)
         }
     } catch (error) {
         if (error.message == "jwt expired") {
@@ -328,11 +349,11 @@ const getAllUsers = async (req, res) => {
         if (!users) {
             return failiureResposne(res, "can`t get users")
         }
-        else{
-            if(users.length == 0){
-                return successResposne(res,"no more users")
+        else {
+            if (users.length == 0) {
+                return successResposne(res, "no more users")
             }
-            return successResposne(res, "all users",users)
+            return successResposne(res, "all users", users)
         }
     } catch (error) {
         return errorResponse(res, "error from delete user", error.message)
@@ -355,4 +376,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword,getAllUsers }
+module.exports = { signUp, login, getProfile, getUserById, updateEmail, updateMobileNumber, changePassword, forgetPassword, resetPassword, getAllUsers,updateUsername }
