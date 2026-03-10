@@ -20,6 +20,7 @@ const addressScema = mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+        default:"Tamilnadu"
     },
     pincode: {
         type: String,
