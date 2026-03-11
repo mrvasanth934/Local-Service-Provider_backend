@@ -16,7 +16,7 @@ const serviceSchema = new mongoose.Schema({
   },
   provider:{
     type:mongoose.Schema.Types.ObjectId,
-    ref:"user"
+    ref:"User"
   },
   providerExperince:{
     type:Number,

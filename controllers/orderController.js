@@ -5,7 +5,7 @@ const { failiureResposne, successResposne, errorResponse } = require("../utils/r
 
 const createOrder = async (req, res) => {
     try {
-        const inputValidate = (provider, service, label, fullAddress, city, state, pincode, servicePrice, paymentMethod, distance) => {
+        const inputValidate = (provider, service, label, fullAddress, city, district, pincode, servicePrice, paymentMethod, distance) => {
             if (!provider) {
                 return failiureResposne(res, "provider is required")
             }
@@ -21,14 +21,14 @@ const createOrder = async (req, res) => {
             if (!city) {
                 return failiureResposne(res, "city is required")
             }
-            if (!state) {
-                return failiureResposne(res, "state is required")
+            if (!district) {
+                return failiureResposne(res, "district is required")
             }
             if (!pincode) {
                 return failiureResposne(res, "pincode is required")
             }
             if (!servicePrice) {
-                return failiureResposne(res, "amount is required")
+                return failiureResposne(res, "servicePrice is required")
             }
             if (!paymentMethod) {
                 return failiureResposne(res, "paymentMethod is required")
@@ -39,8 +39,8 @@ const createOrder = async (req, res) => {
             return true
         }
         const user = req.user
-        const { provider, service, label, fullAddress, city, state, pincode, servicePrice, paymentMethod, distance, } = req.body;
-        if (inputValidate(provider, service, label, fullAddress, city, state, pincode, servicePrice, paymentMethod, distance) == true) {
+        const { provider, service, label, fullAddress, city, district,  pincode, servicePrice, paymentMethod, distance,orderedDate } = req.body;
+        if (inputValidate(provider, service, label, fullAddress, city, district, pincode, servicePrice, paymentMethod, distance) == true) {
             const commisionFee = Number(servicePrice) / 10
             const distanceChargeperKm = Number(distance) * 3;
             const providerEarning = (Number(servicePrice) - commisionFee) + distanceChargeperKm
@@ -49,7 +49,7 @@ const createOrder = async (req, res) => {
             if(!createpayment){
                 return failiureResposne("order failed")
             }
-            const createService = await orderModel.create({ user: user._id, provider, service, address: { label, fullAddress, city, state, pincode }, payment: createpayment._id,orderTotal:total })
+            const createService = await orderModel.create({ user: user._id, provider, service,orderedDate, address: { label, fullAddress, city, district, pincode }, payment: createpayment._id,orderTotal:total })
             if (!createService) {
                 return failiureResposne(res, "order failed")
             }
